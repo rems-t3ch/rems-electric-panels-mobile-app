@@ -31,6 +31,18 @@ interface BoardFormProps {
  */
 export interface BoardFormRef {
   submit: () => void;
+  validate: () => string | null;
+}
+
+/**
+ * Validation errors interface
+ */
+interface ValidationErrors {
+  name?: string;
+  brand?: string;
+  amperageCapacity?: string;
+  location?: string;
+  dates?: string;
 }
 
 /**
@@ -67,6 +79,8 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
       status: initialData?.status || 'OPERATIVE',
     });
 
+    const [errors, setErrors] = useState<ValidationErrors>({});
+
     /**
      * Effect to update form data when initialData changes (for edit mode)
      */
@@ -95,12 +109,61 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
     }, [initialData]);
 
     /**
-     * Expose submit method via ref
+     * Validate form data
+     * @returns Error message if validation fails, null otherwise
+     */
+    const validateForm = (): string | null => {
+      const newErrors: ValidationErrors = {};
+
+      if (!formData.name.trim()) {
+        newErrors.name = 'Name is required';
+      }
+
+      if (!formData.brand.trim()) {
+        newErrors.brand = 'Brand is required';
+      }
+
+      if (!formData.location.trim()) {
+        newErrors.location = 'Location is required';
+      }
+
+      const amperage = parseFloat(formData.amperageCapacity);
+      if (isNaN(amperage) || amperage <= 0) {
+        newErrors.amperageCapacity = 'Amperage capacity must be greater than 0';
+      }
+
+      const manufacturedYear = parseInt(formData.manufacturedDate, 10);
+      const installedYear = parseInt(formData.installedDate, 10);
+
+      if (isNaN(manufacturedYear) || manufacturedYear < 1900 || manufacturedYear > new Date().getFullYear()) {
+        newErrors.dates = 'Invalid manufactured year';
+      }
+
+      if (isNaN(installedYear) || installedYear < 1900 || installedYear > new Date().getFullYear()) {
+        newErrors.dates = 'Invalid installed year';
+      }
+
+      if (manufacturedYear && installedYear && installedYear < manufacturedYear) {
+        newErrors.dates = 'Installation year cannot be before manufactured year';
+      }
+
+      setErrors(newErrors);
+
+      const errorMessages = Object.values(newErrors);
+      return errorMessages.length > 0 ? errorMessages.join('\n') : null;
+    };
+
+    /**
+     * Expose submit and validate methods via ref
      */
     useImperativeHandle(ref, () => ({
       submit: () => {
-        onSubmit(formData);
+        const validationError = validateForm();
+        if (!validationError) {
+          onSubmit(formData);
+        }
       },
+      validate: validateForm,
     }));
 
     /**
@@ -136,27 +199,35 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
     };
 
     return (
-      <View className="min-w-full bg-primary px-6 pt-6">
+      <View className="min-w-full bg-primary px-6 pt-2">
         <ScrollView
           className="flex-grow-0 rounded-3xl border-2 border-white p-4"
           showsVerticalScrollIndicator={false}>
-          <View className="flex flex-col gap-2 px-2">
+          <View className="flex flex-col gap-1 px-2">
             <CustomInput
               label="Name"
               placeholder="Board name"
               value={formData.name}
-              onChangeText={(text) => setFormData({ ...formData, name: text })}
+              onChangeText={(text) => {
+                setFormData({ ...formData, name: text });
+                if (errors.name) setErrors({ ...errors, name: undefined });
+              }}
               editable={!isEditMode}
               style={isEditMode ? { opacity: 0.5 } : {}}
+              error={errors.name}
             />
 
             <CustomInput
               label="Brand"
               placeholder="Brand name"
               value={formData.brand}
-              onChangeText={(text) => setFormData({ ...formData, brand: text })}
+              onChangeText={(text) => {
+                setFormData({ ...formData, brand: text });
+                if (errors.brand) setErrors({ ...errors, brand: undefined });
+              }}
               editable={!isEditMode}
               style={isEditMode ? { opacity: 0.5 } : {}}
+              error={errors.brand}
             />
 
             <CustomInput
@@ -164,16 +235,24 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
               placeholder="0.00"
               keyboardType="decimal-pad"
               value={formData.amperageCapacity}
-              onChangeText={(text) => setFormData({ ...formData, amperageCapacity: text })}
+              onChangeText={(text) => {
+                setFormData({ ...formData, amperageCapacity: text });
+                if (errors.amperageCapacity) setErrors({ ...errors, amperageCapacity: undefined });
+              }}
               editable={!isEditMode}
               style={isEditMode ? { opacity: 0.5 } : {}}
+              error={errors.amperageCapacity}
             />
 
             <CustomInput
               label="Location"
               placeholder="Location"
               value={formData.location}
-              onChangeText={(text) => setFormData({ ...formData, location: text })}
+              onChangeText={(text) => {
+                setFormData({ ...formData, location: text });
+                if (errors.location) setErrors({ ...errors, location: undefined });
+              }}
+              error={errors.location}
             />
 
             <View className="flex flex-row gap-2">
@@ -224,13 +303,17 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
               </View>
             </View>
 
+            {errors.dates && (
+              <Text className="text-xs text-red-400 mt-1">{errors.dates}</Text>
+            )}
+
             <View className="mt-4 flex flex-row gap-2">
               <CustomButton
                 title="OPERATIVE"
                 onPress={() => handleStatusChange('OPERATIVE')}
                 variant={formData.status === 'OPERATIVE' ? 'primary' : 'outline'}
                 className="flex-1 px-2 py-3"
-                textClassName="text-xs"
+                textClassName="text-[8px]"
               />
 
               <CustomButton
@@ -238,7 +321,7 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
                 onPress={() => handleStatusChange('MAINTENANCE')}
                 variant={formData.status === 'MAINTENANCE' ? 'primary' : 'outline'}
                 className="flex-1 px-2 py-3"
-                textClassName="text-xs"
+                textClassName="text-[8px]"
               />
 
               <CustomButton
@@ -246,7 +329,7 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
                 onPress={() => handleStatusChange('OUT OF SERVICE')}
                 variant={formData.status === 'OUT OF SERVICE' ? 'primary' : 'outline'}
                 className="flex-1 px-1 py-5"
-                textClassName="text-xs leading-tight"
+                textClassName="text-[8px] leading-tight"
               />
             </View>
           </View>

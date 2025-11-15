@@ -53,7 +53,7 @@ const BoardsListScreen = () => {
 
   return (
     <View className="min-h-full bg-primary pt-20">
-      <Text className="text-center text-4xl font-bold text-white">Boards</Text>
+      <Text className="text-center text-4xl font-bold text-white">Panels</Text>
 
       {loading && !refreshing && (
         <View className="mt-10">
