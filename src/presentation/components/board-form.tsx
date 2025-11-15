@@ -1,10 +1,13 @@
 import { View, Text, ScrollView, Platform } from 'react-native';
-import { useState, forwardRef, useImperativeHandle } from 'react';
+import { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import CustomInput from '@/shared/components/custom-input';
 import CustomButton from '@/shared/components/custom-button';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-interface BoardFormData {
+/**
+ * Props for the BoardForm component
+ */
+export interface BoardFormData {
   name: string;
   brand: string;
   amperageCapacity: string;
@@ -14,11 +17,18 @@ interface BoardFormData {
   status: 'OPERATIVE' | 'MAINTENANCE' | 'OUT OF SERVICE';
 }
 
+/**
+ * Props for the BoardForm component
+ */
 interface BoardFormProps {
   initialData?: Partial<BoardFormData>;
   onSubmit: (data: BoardFormData) => void;
+  isEditMode?: boolean;
 }
 
+/**
+ * Ref interface for the BoardForm component
+ */
 export interface BoardFormRef {
   submit: () => void;
 }
@@ -45,135 +55,205 @@ export interface BoardFormRef {
  *
  * @returns {JSX.Element} The fully controlled board form component.
  */
-const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(({ initialData, onSubmit }, ref) => {
-  const [formData, setFormData] = useState<BoardFormData>({
-    name: initialData?.name || '',
-    brand: initialData?.brand || '',
-    amperageCapacity: initialData?.amperageCapacity || '0.00',
-    location: initialData?.location || '',
-    installedDate: initialData?.installedDate || '',
-    manufacturedDate: initialData?.manufacturedDate || '',
-    status: initialData?.status || 'OPERATIVE',
-  });
+const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
+  ({ initialData, onSubmit, isEditMode = false }, ref) => {
+    const [formData, setFormData] = useState<BoardFormData>({
+      name: initialData?.name || '',
+      brand: initialData?.brand || '',
+      amperageCapacity: initialData?.amperageCapacity || '0.00',
+      location: initialData?.location || '',
+      installedDate: initialData?.installedDate || new Date().getFullYear().toString(),
+      manufacturedDate: initialData?.manufacturedDate || new Date().getFullYear().toString(),
+      status: initialData?.status || 'OPERATIVE',
+    });
 
-  useImperativeHandle(ref, () => ({
-    submit: () => {
-      onSubmit(formData);
-    },
-  }));
+    /**
+     * Effect to update form data when initialData changes (for edit mode)
+     */
+    useEffect(() => {
+      if (initialData) {
+        setFormData({
+          name: initialData.name || '',
+          brand: initialData.brand || '',
+          amperageCapacity: initialData.amperageCapacity || '0.00',
+          location: initialData.location || '',
+          installedDate: initialData.installedDate || new Date().getFullYear().toString(),
+          manufacturedDate: initialData.manufacturedDate || new Date().getFullYear().toString(),
+          status: initialData.status || 'OPERATIVE',
+        });
+      } else {
+        setFormData({
+          name: '',
+          brand: '',
+          amperageCapacity: '0.00',
+          location: '',
+          installedDate: new Date().getFullYear().toString(),
+          manufacturedDate: new Date().getFullYear().toString(),
+          status: 'OPERATIVE',
+        });
+      }
+    }, [initialData]);
 
-  const handleStatusChange = (status: BoardFormData['status']) => {
-    setFormData({ ...formData, status });
-  };
+    /**
+     * Expose submit method via ref
+     */
+    useImperativeHandle(ref, () => ({
+      submit: () => {
+        onSubmit(formData);
+      },
+    }));
 
-  const handleInstalledDateChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      setFormData({ ...formData, installedDate: selectedDate.toISOString().split('T')[0] });
-    }
-  };
+    /**
+     * Handle status change
+     * @param status The new status of the board
+     */
+    const handleStatusChange = (status: BoardFormData['status']) => {
+      setFormData({ ...formData, status });
+    };
 
-  const handleManufacturedDateChange = (event: any, selectedDate?: Date) => {
-    if (selectedDate) {
-      setFormData({ ...formData, manufacturedDate: selectedDate.toISOString().split('T')[0] });
-    }
-  };
+    /**
+     * Handle installed date change
+     * @param event The date change event
+     * @param selectedDate The selected date
+     */
+    const handleInstalledDateChange = (event: any, selectedDate?: Date) => {
+      if (selectedDate) {
+        const year = selectedDate.getFullYear().toString();
+        setFormData({ ...formData, installedDate: year });
+      }
+    };
 
-  return (
-    <View className="min-w-full bg-primary px-6 pt-6">
-      <ScrollView
-        className="flex-grow-0 rounded-3xl border-2 border-white p-4"
-        showsVerticalScrollIndicator={false}>
-        <View className="flex flex-col gap-2 px-2">
-          <CustomInput
-            label="Name"
-            placeholder="Board name"
-            value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
-          />
+    /**
+     * Handle manufactured date change
+     * @param event The date change event
+     * @param selectedDate The selected date
+     */
+    const handleManufacturedDateChange = (event: any, selectedDate?: Date) => {
+      if (selectedDate) {
+        const year = selectedDate.getFullYear().toString();
+        setFormData({ ...formData, manufacturedDate: year });
+      }
+    };
 
-          <CustomInput
-            label="Brand"
-            placeholder="Brand name"
-            value={formData.brand}
-            onChangeText={(text) => setFormData({ ...formData, brand: text })}
-          />
+    return (
+      <View className="min-w-full bg-primary px-6 pt-6">
+        <ScrollView
+          className="flex-grow-0 rounded-3xl border-2 border-white p-4"
+          showsVerticalScrollIndicator={false}>
+          <View className="flex flex-col gap-2 px-2">
+            <CustomInput
+              label="Name"
+              placeholder="Board name"
+              value={formData.name}
+              onChangeText={(text) => setFormData({ ...formData, name: text })}
+              editable={!isEditMode}
+              style={isEditMode ? { opacity: 0.5 } : {}}
+            />
 
-          <CustomInput
-            label="Amperage Capacity"
-            placeholder="0.00"
-            keyboardType="decimal-pad"
-            value={formData.amperageCapacity}
-            onChangeText={(text) => setFormData({ ...formData, amperageCapacity: text })}
-          />
+            <CustomInput
+              label="Brand"
+              placeholder="Brand name"
+              value={formData.brand}
+              onChangeText={(text) => setFormData({ ...formData, brand: text })}
+              editable={!isEditMode}
+              style={isEditMode ? { opacity: 0.5 } : {}}
+            />
 
-          <CustomInput
-            label="Location"
-            placeholder="Location"
-            value={formData.location}
-            onChangeText={(text) => setFormData({ ...formData, location: text })}
-          />
+            <CustomInput
+              label="Amperage Capacity"
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              value={formData.amperageCapacity}
+              onChangeText={(text) => setFormData({ ...formData, amperageCapacity: text })}
+              editable={!isEditMode}
+              style={isEditMode ? { opacity: 0.5 } : {}}
+            />
 
-          <View className="flex flex-row gap-2">
-            <View className="flex-1">
-              <Text className="mb-2 text-sm font-semibold text-white">Installed</Text>
-              <View className="ml-2 overflow-hidden rounded-xl bg-white">
-                <DateTimePicker
-                  value={formData.installedDate ? new Date(formData.installedDate) : new Date()}
-                  mode="date"
-                  display="compact"
-                  onChange={handleInstalledDateChange}
-                  themeVariant="light"
-                />
+            <CustomInput
+              label="Location"
+              placeholder="Location"
+              value={formData.location}
+              onChangeText={(text) => setFormData({ ...formData, location: text })}
+            />
+
+            <View className="flex flex-row gap-2">
+              <View className="flex-1">
+                <Text
+                  className="mb-2 text-sm font-semibold text-white"
+                  style={isEditMode ? { opacity: 0.5 } : {}}>
+                  Installed
+                </Text>
+                <View
+                  className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''}`}>
+                  <DateTimePicker
+                    value={
+                      new Date(parseInt(formData.installedDate) || new Date().getFullYear(), 0, 1)
+                    }
+                    mode="date"
+                    display="compact"
+                    onChange={handleInstalledDateChange}
+                    themeVariant="light"
+                    disabled={isEditMode}
+                  />
+                </View>
+              </View>
+
+              <View className="flex-1 ">
+                <Text
+                  className="mb-2 text-sm font-semibold text-white"
+                  style={isEditMode ? { opacity: 0.5 } : {}}>
+                  Manufactured
+                </Text>
+                <View
+                  className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''}`}>
+                  <DateTimePicker
+                    value={
+                      new Date(
+                        parseInt(formData.manufacturedDate) || new Date().getFullYear(),
+                        0,
+                        1
+                      )
+                    }
+                    mode="date"
+                    display="compact"
+                    onChange={handleManufacturedDateChange}
+                    themeVariant="light"
+                    disabled={isEditMode}
+                  />
+                </View>
               </View>
             </View>
 
-            <View className="flex-1 ">
-              <Text className="mb-2 text-sm font-semibold text-white">Manufactured</Text>
-              <View className="ml-2 overflow-hidden rounded-xl bg-white">
-                <DateTimePicker
-                  value={
-                    formData.manufacturedDate ? new Date(formData.manufacturedDate) : new Date()
-                  }
-                  mode="date"
-                  display="compact"
-                  onChange={handleManufacturedDateChange}
-                  themeVariant="light"
-                />
-              </View>
+            <View className="mt-4 flex flex-row gap-2">
+              <CustomButton
+                title="OPERATIVE"
+                onPress={() => handleStatusChange('OPERATIVE')}
+                variant={formData.status === 'OPERATIVE' ? 'primary' : 'outline'}
+                className="flex-1 px-2 py-3"
+                textClassName="text-xs"
+              />
+
+              <CustomButton
+                title="MAINTENANCE"
+                onPress={() => handleStatusChange('MAINTENANCE')}
+                variant={formData.status === 'MAINTENANCE' ? 'primary' : 'outline'}
+                className="flex-1 px-2 py-3"
+                textClassName="text-xs"
+              />
+
+              <CustomButton
+                title="OUT OF SERVICE"
+                onPress={() => handleStatusChange('OUT OF SERVICE')}
+                variant={formData.status === 'OUT OF SERVICE' ? 'primary' : 'outline'}
+                className="flex-1 px-1 py-5"
+                textClassName="text-xs leading-tight"
+              />
             </View>
           </View>
-
-          <View className="mt-4 flex flex-row gap-2">
-            <CustomButton
-              title="OPERATIVE"
-              onPress={() => handleStatusChange('OPERATIVE')}
-              variant={formData.status === 'OPERATIVE' ? 'primary' : 'outline'}
-              className="flex-1 px-2 py-3"
-              textClassName="text-xs"
-            />
-
-            <CustomButton
-              title="MAINTENANCE"
-              onPress={() => handleStatusChange('MAINTENANCE')}
-              variant={formData.status === 'MAINTENANCE' ? 'primary' : 'outline'}
-              className="flex-1 px-2 py-3"
-              textClassName="text-xs"
-            />
-
-            <CustomButton
-              title="OUT OF SERVICE"
-              onPress={() => handleStatusChange('OUT OF SERVICE')}
-              variant={formData.status === 'OUT OF SERVICE' ? 'primary' : 'outline'}
-              className="flex-1 px-1 py-5"
-              textClassName="text-[10px] leading-tight"
-            />
-          </View>
-        </View>
-      </ScrollView>
-    </View>
-  );
-});
-
-BoardForm.displayName = 'BoardForm';
+        </ScrollView>
+      </View>
+    );
+  }
+);
 
 export default BoardForm;
