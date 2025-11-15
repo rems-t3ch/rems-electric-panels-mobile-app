@@ -52,9 +52,9 @@ export default function HomeScreen() {
           <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
             <TouchableOpacity
               onPress={handlePress}
-              className="mt-4 rounded-full bg-coral px-6 py-3">
+              className="mt-4 rounded-xl bg-coral px-6 py-5">
               <Text className="text-center font-semibold text-white">
-                ¿Por qué deberían contratarme?
+                Why should they hire me?
               </Text>
             </TouchableOpacity>
           </Animated.View>
