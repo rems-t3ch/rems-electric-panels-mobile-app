@@ -30,7 +30,7 @@ export class PanelAssembler {
    * Convert single entity response
    */
   static toEntityFromResponse(response: any): ElectricalPanel | null {
-    if (response.status !== 200) {
+    if (response.status !== 200 && response.status !== 201) {
       console.error(`${response.status} - ${response.statusText}`);
       return null;
     }
