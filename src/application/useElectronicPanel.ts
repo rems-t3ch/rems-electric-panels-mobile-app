@@ -163,6 +163,13 @@ export const useElectronicPanel = () => {
     setError(null);
   }, []);
 
+  /**
+   * Clear current panel state
+   */
+  const clearCurrentPanel = useCallback(() => {
+    setCurrentPanel(null);
+  }, []);
+
   return {
     panels,
     currentPanel,
@@ -175,5 +182,6 @@ export const useElectronicPanel = () => {
     updatePanel,
     deletePanel,
     clearError,
+    clearCurrentPanel,
   };
 };
