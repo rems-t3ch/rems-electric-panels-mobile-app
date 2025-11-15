@@ -39,6 +39,7 @@ const UpsertBoardScreen = () => {
     clearCurrentPanel,
   } = useElectronicPanel();
   const [initialData, setInitialData] = useState<Partial<BoardFormData> | undefined>(undefined);
+  const [formKey, setFormKey] = useState(0);
 
   /**
    * Determine edit mode based on the route and parameters
@@ -53,6 +54,7 @@ const UpsertBoardScreen = () => {
       setInitialData(undefined);
       clearError();
       clearCurrentPanel();
+      setFormKey(prev => prev + 1); // Force form remount
     }
   }, [pathname]);
 
@@ -140,6 +142,7 @@ const UpsertBoardScreen = () => {
         await createPanel(payload);
         setInitialData(undefined);
         clearCurrentPanel();
+        setFormKey(prev => prev + 1);
 
         Alert.alert('Success', 'Panel created successfully', [
           {
@@ -193,6 +196,7 @@ const UpsertBoardScreen = () => {
           {initialData !== undefined || !isEditMode ? (
             <>
               <BoardForm
+                key={formKey}
                 ref={formRef}
                 onSubmit={handleSave}
                 initialData={initialData}
