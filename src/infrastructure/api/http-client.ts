@@ -24,11 +24,9 @@ export const httpClient = axios.create({
  */
 httpClient.interceptors.request.use(
   (config) => {
-    console.log(`[HTTP Request] ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => {
-    console.error('[HTTP Request Error]', error);
     return Promise.reject(error);
   }
 );
@@ -41,11 +39,9 @@ httpClient.interceptors.request.use(
  */
 httpClient.interceptors.response.use(
   (response) => {
-    console.log(`[HTTP Response] ${response.status} ${response.config.url}`);
     return response;
   },
   (error) => {
-    console.error('[HTTP Response Error]', error.response?.data || error.message);
     return Promise.reject(error);
   }
 );

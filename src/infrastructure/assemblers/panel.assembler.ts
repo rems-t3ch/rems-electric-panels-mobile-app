@@ -18,7 +18,6 @@ export class PanelAssembler {
    */
   static toEntitiesFromResponse(response: any): ElectricalPanel[] {
     if (response.status !== 200) {
-      console.error(`${response.status} - ${response.statusText}`);
       return [];
     }
 
@@ -31,7 +30,6 @@ export class PanelAssembler {
    */
   static toEntityFromResponse(response: any): ElectricalPanel | null {
     if (response.status !== 200 && response.status !== 201) {
-      console.error(`${response.status} - ${response.statusText}`);
       return null;
     }
 
