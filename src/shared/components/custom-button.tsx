@@ -9,6 +9,7 @@ interface CustomButtonProps {
   variant?: 'primary' | 'secondary' | 'outline';
   className?: string;
   textClassName?: string;
+  disabled?: boolean;
 }
 
 /**
@@ -34,6 +35,7 @@ const CustomButton = ({
   variant = 'primary',
   className = '',
   textClassName = '',
+  disabled = false,
 }: CustomButtonProps) => {
   const getVariantStyles = () => {
     switch (variant) {
@@ -63,7 +65,8 @@ const CustomButton = ({
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`items-center justify-center rounded-xl border-2 ${getVariantStyles()} ${className}`}>
+      disabled={disabled}
+      className={`items-center justify-center rounded-xl border-2 ${getVariantStyles()} ${disabled ? 'opacity-50' : ''} ${className}`}>
       <Text className={`font-bold ${getTextStyles()} ${textClassName || 'text-base'}`}>
         {title}
       </Text>
