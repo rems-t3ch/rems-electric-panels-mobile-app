@@ -1,13 +1,13 @@
-import { Text, View } from 'react-native';
+import BoardsListScreen from '@/presentation/screens/boards-list-screen';
 
+/**
+ * Board List Route
+ * 
+ * @summary Renders the BoardsListScreen inside the tab navigation.
+ * @returns {JSX.Element} The Board List screen component.
+ */
 const BoardList = () => {
-  return (
-    <>
-      <View className="flex items-center min-h-full justify-center bg-green-400">
-        <Text>Board List Screen</Text>
-      </View>
-    </>
-  );
+  return <BoardsListScreen/>;
 };
 
 export default BoardList;
