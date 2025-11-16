@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import { Text, View, FlatList, ActivityIndicator } from 'react-native';
 import { useEffect, useState } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
@@ -67,22 +67,19 @@ const BoardsListScreen = () => {
         </View>
       )}
 
-      <ScrollView
+      <FlatList
         className="mt-5 flex-1"
+        data={panels}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <BoardItem panel={item} onDelete={handleDelete} />}
+        contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#ffffff" />
-        }>
-        <View className="gap-4 pb-6">
-          {panels.map((panel) => (
-            <BoardItem key={panel.id} panel={panel} onDelete={handleDelete} />
-          ))}
-
-          {!loading && panels.length === 0 && (
-            <Text className="mt-10 text-center text-white">No panels found</Text>
-          )}
-        </View>
-      </ScrollView>
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        ListEmptyComponent={() =>
+          !loading && <Text className="mt-10 text-center text-white">No panels found</Text>
+        }
+      />
     </View>
   );
 };
