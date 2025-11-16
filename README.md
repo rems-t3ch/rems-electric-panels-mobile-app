@@ -5,6 +5,11 @@
 REMS Electric Panels Mobile Application is a comprehensive solution for managing electrical panel inventory and maintenance operations. Built with React Native, Expo, and TypeScript, this cross-platform mobile application enables real-time tracking, monitoring, and management of electrical panel assets. The application follows a layered architecture approach with clear separation of concerns and implements the Assembler pattern for robust data transformation between layers.
 </p>
 
+## Application Preview
+Para una visión completa del funcionamiento de la aplicación en iOS y Android, incluyendo cada pantalla, revisa:
+
+**[APPLICATION_PREVIEW.md](./docs/APP_PREVIEW.md)**
+
 ## Features
 - Cross-Platform Mobile Application (iOS & Android)
 - RESTful API Integration
