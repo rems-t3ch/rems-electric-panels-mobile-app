@@ -81,6 +81,10 @@ This visual preview demonstrates the complete functionality of the mobile applic
 
 # Screenshot Folder Structure
 
+<p align="justify">
+The following is the structure of the `docs/screenshots/` folder containing the images used in this preview that illustrate the application's UI states:
+</p>
+
 ```txt
 screenshots/
 ├── android-home.png

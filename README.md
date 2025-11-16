@@ -6,7 +6,7 @@ REMS Electric Panels Mobile Application is a comprehensive solution for managing
 </p>
 
 ## Application Preview
-Para una visión completa del funcionamiento de la aplicación en iOS y Android, incluyendo cada pantalla, revisa:
+For a complete overview of how the app works on iOS and Android, including every screen, check out:
 
 **[APPLICATION_PREVIEW.md](./docs/APP_PREVIEW.md)**
 
