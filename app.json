@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "rems-electric-panels-mobile-app",
+    "name": "REMS Electronic Panels",
     "slug": "rems-electric-panels-mobile-app",
     "version": "1.0.0",
     "web": {
@@ -14,7 +14,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
