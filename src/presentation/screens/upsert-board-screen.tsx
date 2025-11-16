@@ -54,7 +54,10 @@ const UpsertBoardScreen = () => {
       setInitialData(undefined);
       clearError();
       clearCurrentPanel();
-      setFormKey(prev => prev + 1); // Force form remount
+      /**
+       * Force form remount to reset its internal state
+       */
+      setFormKey(prev => prev + 1);
     }
   }, [pathname]);
 

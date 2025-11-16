@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Platform } from 'react-native';
+import { View, Text, ScrollView, Platform, Pressable } from 'react-native';
 import { useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import CustomInput from '@/shared/components/custom-input';
 import CustomButton from '@/shared/components/custom-button';
@@ -80,6 +80,8 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
     });
 
     const [errors, setErrors] = useState<ValidationErrors>({});
+    const [showInstalledPicker, setShowInstalledPicker] = useState(false);
+    const [showManufacturedPicker, setShowManufacturedPicker] = useState(false);
 
     /**
      * Effect to update form data when initialData changes (for edit mode)
@@ -180,6 +182,10 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
      * @param selectedDate The selected date
      */
     const handleInstalledDateChange = (event: any, selectedDate?: Date) => {
+      if (Platform.OS === 'android') {
+        setShowInstalledPicker(false);
+      }
+
       if (selectedDate) {
         const year = selectedDate.getFullYear().toString();
         setFormData({ ...formData, installedDate: year });
@@ -192,6 +198,13 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
      * @param selectedDate The selected date
      */
     const handleManufacturedDateChange = (event: any, selectedDate?: Date) => {
+      /**
+       * On Android the picker is modal — hide it after selection/dismiss
+       */
+      if (Platform.OS === 'android') {
+        setShowManufacturedPicker(false);
+      }
+
       if (selectedDate) {
         const year = selectedDate.getFullYear().toString();
         setFormData({ ...formData, manufacturedDate: year });
@@ -262,37 +275,90 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
                   style={isEditMode ? { opacity: 0.5 } : {}}>
                   Installed
                 </Text>
-                <View
-                  className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''}`}>
-                  <DateTimePicker
-                    value={
-                      new Date(parseInt(formData.installedDate) || new Date().getFullYear(), 0, 1)
+                <Pressable
+                  onPress={() => {
+                    if (!isEditMode) {
+                      if (Platform.OS === 'android') setShowInstalledPicker(true);
                     }
+                  }}
+                  disabled={isEditMode}
+                >
+                  <View
+                    className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''} px-3 py-3`}
+                  >
+                    <Text className="text-black">
+                      {new Date(parseInt(formData.installedDate) || new Date().getFullYear(), 0, 1).toLocaleDateString(undefined, {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </Text>
+                  </View>
+                </Pressable>
+
+                {/*Render modal picker only on Android when requested. On iOS the compact picker remains inline.*/}
+                {Platform.OS === 'android' && showInstalledPicker && (
+                  <DateTimePicker
+                    value={new Date(parseInt(formData.installedDate) || new Date().getFullYear(), 0, 1)}
                     mode="date"
-                    display="compact"
+                    display="default"
                     onChange={handleInstalledDateChange}
                     themeVariant="light"
-                    disabled={isEditMode}
                   />
-                </View>
+                )}
+                {Platform.OS !== 'android' && (
+                  <View className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''}`}>
+                    <DateTimePicker
+                      value={new Date(parseInt(formData.installedDate) || new Date().getFullYear(), 0, 1)}
+                      mode="date"
+                      display="compact"
+                      onChange={handleInstalledDateChange}
+                      themeVariant="light"
+                      disabled={isEditMode}
+                    />
+                  </View>
+                )}
               </View>
 
-              <View className="flex-1 ">
-                <Text
-                  className="mb-2 text-sm font-semibold text-white"
-                  style={isEditMode ? { opacity: 0.5 } : {}}>
-                  Manufactured
-                </Text>
-                <View
-                  className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''}`}>
+            <View className="flex-1 ">
+              <Text
+                className="mb-2 text-sm font-semibold text-white"
+                style={isEditMode ? { opacity: 0.5 } : {}}>
+                Manufactured
+              </Text>
+              <Pressable
+                onPress={() => {
+                  if (!isEditMode) {
+                    if (Platform.OS === 'android') setShowManufacturedPicker(true);
+                  }
+                }}
+                disabled={isEditMode}
+              >
+                <View className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''} px-3 py-3`}>
+                  <Text className="text-black">
+                    {new Date(parseInt(formData.manufacturedDate) || new Date().getFullYear(), 0, 1).toLocaleDateString(undefined, {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </Text>
+                </View>
+              </Pressable>
+
+              {Platform.OS === 'android' && showManufacturedPicker && (
+                <DateTimePicker
+                  value={new Date(parseInt(formData.manufacturedDate) || new Date().getFullYear(), 0, 1)}
+                  mode="date"
+                  display="default"
+                  onChange={handleManufacturedDateChange}
+                  themeVariant="light"
+                />
+              )}
+
+              {Platform.OS !== 'android' && (
+                <View className={`ml-2 overflow-hidden rounded-xl bg-white ${isEditMode ? 'opacity-50' : ''}`}>
                   <DateTimePicker
-                    value={
-                      new Date(
-                        parseInt(formData.manufacturedDate) || new Date().getFullYear(),
-                        0,
-                        1
-                      )
-                    }
+                    value={new Date(parseInt(formData.manufacturedDate) || new Date().getFullYear(), 0, 1)}
                     mode="date"
                     display="compact"
                     onChange={handleManufacturedDateChange}
@@ -300,7 +366,8 @@ const BoardForm = forwardRef<BoardFormRef, BoardFormProps>(
                     disabled={isEditMode}
                   />
                 </View>
-              </View>
+              )}
+            </View>
             </View>
 
             {errors.dates && (
